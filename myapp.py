@@ -9,15 +9,6 @@ import requests
 
 app = FastAPI()
 
-#def load_data():
-#    try:
-#        df_test = pd.read_csv("/content/drive/MyDrive/Projet 7/test_preprocess_reduit.csv")
-#        return df_test
-#    except Exception as e:
-#        raise ValueError(f"Error loading DataFrame: {str(e)}")
-
-
-
 def load_data():
     try:
         # URL к архиву ZIP
@@ -35,15 +26,6 @@ def load_data():
     except Exception as e:
         raise ValueError(f"Error loading DataFrame: {str(e)}")
 
-
-
-#def load_model():
-#    try:
-#        with open('/content/drive/MyDrive/Projet 7/model_su04.pkl', 'rb') as file:
-#            model = joblib.load(file)
-#        return model
-#    except Exception as e:
-#        raise ValueError(f"Error loading model: {str(e)}")
 
 def load_model():
     try:
