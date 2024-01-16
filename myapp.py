@@ -5,7 +5,7 @@ import pickle
 import joblib
 from io import BytesIO
 from zipfile import ZipFile
-import requests
+import aiohttp
 
 app = FastAPI()
 
@@ -13,7 +13,11 @@ async def load_data():
     try:
         zip_url = "https://github.com/MarinaSupiot/fast_api/raw/main/test_preprocess_reduit.csv.zip"
         
-        with ZipFile(BytesIO(await requests.get(zip_url).content), 'r') as zip_file:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(zip_url) as response:
+                content = await response.read()
+        
+        with ZipFile(BytesIO(content), 'r') as zip_file:
             csv_file_name = 'test_preprocess_reduit.csv'
             with zip_file.open(csv_file_name) as file:
                 df_test = pd.read_csv(file)
@@ -26,7 +30,11 @@ async def load_data():
 async def load_model():
     try:
         model_url = "https://raw.githubusercontent.com/MarinaSupiot/fast_api/main/model_su04.pkl"
-        model_content = await requests.get(model_url).content
+        
+        async with aiohttp.ClientSession() as session:
+            async with session.get(model_url) as response:
+                model_content = await response.read()
+        
         model = joblib.load(BytesIO(model_content))
         
         return model
@@ -44,8 +52,4 @@ async def get_load_data():
 async def get_load_model():
     model = await load_model()
     return {"model": str(model)}
-
-
-
-
 
