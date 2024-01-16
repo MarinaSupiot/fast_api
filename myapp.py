@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 import pandas as pd
 import pickle
@@ -9,17 +9,13 @@ import requests
 
 app = FastAPI()
 
-def load_data():
+async def load_data():
     try:
-        # URL к архиву ZIP
         zip_url = "https://github.com/MarinaSupiot/fast_api/raw/main/test_preprocess_reduit.csv.zip"
         
-        # Чтение ZIP-архива и извлечение файла
-        with ZipFile(BytesIO(requests.get(zip_url).content), 'r') as zip_file:
-            # Извлечение файла CSV из архива
+        with ZipFile(BytesIO(await requests.get(zip_url).content), 'r') as zip_file:
             csv_file_name = 'test_preprocess_reduit.csv'
             with zip_file.open(csv_file_name) as file:
-                # Чтение CSV файла в DataFrame
                 df_test = pd.read_csv(file)
 
         return df_test
@@ -27,15 +23,10 @@ def load_data():
         raise ValueError(f"Error loading DataFrame: {str(e)}")
 
 
-def load_model():
+async def load_model():
     try:
-        # URL к вашему файлу модели на GitHub
         model_url = "https://raw.githubusercontent.com/MarinaSupiot/fast_api/main/model_su04.pkl"
-        
-        # Получение содержимого файла модели по URL
-        model_content = requests.get(model_url).content
-        
-        # Загрузка модели из байтового содержимого
+        model_content = await requests.get(model_url).content
         model = joblib.load(BytesIO(model_content))
         
         return model
@@ -43,16 +34,15 @@ def load_model():
         raise ValueError(f"Error loading model: {str(e)}")
 
 
-
 @app.get("/load_data")
-def get_load_data():
-    df_test = load_data()
+async def get_load_data():
+    df_test = await load_data()
     return df_test.to_dict(orient='records')
 
 
 @app.get("/load_model")
-def get_load_model():
-    model = load_model()
+async def get_load_model():
+    model = await load_model()
     return {"model": str(model)}
 
 
