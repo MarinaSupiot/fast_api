@@ -37,10 +37,25 @@ def load_data():
 
 
 
+#def load_model():
+#    try:
+#        with open('/content/drive/MyDrive/Projet 7/model_su04.pkl', 'rb') as file:
+#            model = joblib.load(file)
+#        return model
+#    except Exception as e:
+#        raise ValueError(f"Error loading model: {str(e)}")
+
 def load_model():
     try:
-        with open('/content/drive/MyDrive/Projet 7/model_su04.pkl', 'rb') as file:
-            model = joblib.load(file)
+        # URL к вашему файлу модели на GitHub
+        model_url = "https://raw.githubusercontent.com/MarinaSupiot/fast_api/main/model_su04.pkl"
+        
+        # Получение содержимого файла модели по URL
+        model_content = requests.get(model_url).content
+        
+        # Загрузка модели из байтового содержимого
+        model = joblib.load(BytesIO(model_content))
+        
         return model
     except Exception as e:
         raise ValueError(f"Error loading model: {str(e)}")
