@@ -10,19 +10,19 @@ from aiohttp import ClientSession
 
 app = FastAPI()
 
-async def load_data(start_row=0, chunk_size=5000):
+async def load_data(offset: int, limit: int):
     try:
         zip_url = "https://github.com/MarinaSupiot/fast_api/raw/main/test_preprocess_reduit.csv.zip"
         
-        async with ClientSession() as session:
+        async with aiohttp.ClientSession() as session:
             async with session.get(zip_url) as response:
                 content = await response.read()
-
+        
         with ZipFile(BytesIO(content), 'r') as zip_file:
             csv_file_name = 'test_preprocess_reduit.csv'
             with zip_file.open(csv_file_name) as file:
-                # Читаем только часть данных с использованием параметров skiprows и nrows
-                df_test = pd.read_csv(file, skiprows=range(1, start_row), nrows=chunk_size)
+                # Считываем данные с учетом offset и limit
+                df_test = pd.read_csv(file, skiprows=offset, nrows=limit)
 
         return df_test
     except Exception as e:
@@ -43,10 +43,9 @@ async def load_model():
     except Exception as e:
         raise ValueError(f"Error loading model: {str(e)}")
 
-
 @app.get("/load_data")
-async def get_load_data(start_row: int = 0, chunk_size: int = 5000):
-    df_test = await load_data(start_row=start_row, chunk_size=chunk_size)
+async def get_load_data(offset: int = 0, limit: int = 5000):
+    df_test = await load_data(offset, limit)
     return df_test.to_dict(orient='records')
 
 
