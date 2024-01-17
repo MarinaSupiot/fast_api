@@ -23,7 +23,7 @@ async def load_data():
             csv_file_name = 'test_preprocess_reduit.csv'
             with zip_file.open(csv_file_name) as file:
                 # Уменьшите количество данных при необходимости
-                df_test = pd.read_csv(file, nrows=10000)  # пример: загрузить первые 1000 строк
+                df_test = pd.read_csv(file, nrows=50000)  # пример: загрузить первые 1000 строк
 
         return df_test
     except Exception as e:
