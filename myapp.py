@@ -10,7 +10,7 @@ from aiohttp import ClientSession
 
 app = FastAPI()
 
-async def load_data():
+async def load_data(start_row=0, chunk_size=5000):
     try:
         zip_url = "https://github.com/MarinaSupiot/fast_api/raw/main/test_preprocess_reduit.csv.zip"
         
@@ -18,12 +18,11 @@ async def load_data():
             async with session.get(zip_url) as response:
                 content = await response.read()
 
-        # Используйте асинхронную библиотеку для работы с ZIP-архивом, если доступно
         with ZipFile(BytesIO(content), 'r') as zip_file:
             csv_file_name = 'test_preprocess_reduit.csv'
             with zip_file.open(csv_file_name) as file:
-                # Уменьшите количество данных при необходимости
-                df_test = pd.read_csv(file, nrows=50000)  # пример: загрузить первые 1000 строк
+                # Читаем только часть данных с использованием параметров skiprows и nrows
+                df_test = pd.read_csv(file, skiprows=range(1, start_row), nrows=chunk_size)
 
         return df_test
     except Exception as e:
@@ -46,8 +45,8 @@ async def load_model():
 
 
 @app.get("/load_data")
-async def get_load_data():
-    df_test = await load_data()
+async def get_load_data(start_row: int = 0, chunk_size: int = 5000):
+    df_test = await load_data(start_row=start_row, chunk_size=chunk_size)
     return df_test.to_dict(orient='records')
 
 
