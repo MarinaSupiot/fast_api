@@ -45,7 +45,7 @@ async def load_model():
         raise ValueError(f"Error loading model: {str(e)}")
 
 @app.get("/load_data")
-async def get_load_data(offset: int = 0, limit: int = 1000):
+async def get_load_data(offset: int = 0, limit: int = 8000):
     df_test = await load_data(offset, limit)
     return df_test.to_dict(orient='records')
 
