@@ -22,7 +22,8 @@ async def load_data(offset: int, limit: int):
             csv_file_name = 'test_preprocess_reduit.csv'
             with zip_file.open(csv_file_name) as file:
                 # Считываем данные с учетом offset и limit
-                df_test = pd.read_csv(file, skiprows=offset, nrows=limit)
+                #df_test = pd.read_csv(file, skiprows=offset, nrows=limit)
+                df_test = pd.read_csv(file, skiprows=range(1, offset + 1), nrows=limit)
 
         return df_test
     except Exception as e:
