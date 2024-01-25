@@ -37,19 +37,25 @@ def jsonable_encoder_custom(item):
     return json.JSONEncoder.default(item)
 
 
+def jsonable_encoder_custom(item):
+    if isinstance(item, np.int64):
+        return int(item)
+    return json.JSONEncoder.default(item)
+
 async def load_model():
     try:
         model_url = "https://raw.githubusercontent.com/MarinaSupiot/fast_api/main/model_su04.pkl"
-        
+
         async with aiohttp.ClientSession() as session:
             async with session.get(model_url) as response:
                 model_content = await response.read()
-        
+
         model = joblib.load(BytesIO(model_content))
-        
+
         return model
     except Exception as e:
         raise ValueError(f"Error loading model: {str(e)}")
+
 
 @app.get("/load_data")
 async def get_load_data(offset: int = 0, limit: int = 8000):
@@ -57,9 +63,15 @@ async def get_load_data(offset: int = 0, limit: int = 8000):
     return df_test.to_dict(orient='records')
 
 
-@app.get("/load_model", response_model=Response)
+@app.get("/load_model", response_class=Response)
 async def get_load_model():
     model = await load_model()
-    
-    # Используйте jsonable_encoder_custom вместо jsonable_encoder
-    return Response(content=model, media_type="application/octet-stream", headers={"Content-Disposition": "attachment; filename=model.pkl"})
+
+    # Преобразуйте модель в бинарные данные
+    model_bytes = joblib.dump(model)
+
+    return Response(
+        content=model_bytes,
+        media_type="application/octet-stream",
+        headers={"Content-Disposition": "attachment; filename=model.pkl"}
+    )
