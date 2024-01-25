@@ -56,16 +56,6 @@ async def load_model():
     except Exception as e:
         raise ValueError(f"Error loading model: {str(e)}")
 
-@app.get("/load_model", response_class=Response)
-async def get_load_model():
-    model_content = await load_model()
-
-    return Response(
-        content=model_content,
-        media_type="application/octet-stream",
-        headers={"Content-Disposition": "attachment; filename=model.pkl"}
-    )
-    )
 
 
 @app.get("/load_data")
@@ -76,14 +66,11 @@ async def get_load_data(offset: int = 0, limit: int = 8000):
 
 @app.get("/load_model", response_class=Response)
 async def get_load_model():
-    model = await load_model()
-
-    # Сохраняем модель в бинарных данных с использованием BytesIO
-    model_bytes_io = BytesIO()
-    joblib.dump(model, model_bytes_io)
+    model_content = await load_model()
 
     return Response(
-        content=model_bytes_io.getvalue(),
+        content=model_content,
         media_type="application/octet-stream",
         headers={"Content-Disposition": "attachment; filename=model.pkl"}
+    )
     )
