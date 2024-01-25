@@ -7,6 +7,7 @@ from io import BytesIO
 from zipfile import ZipFile
 import aiohttp
 from aiohttp import ClientSession
+import numpy as np
 
 app = FastAPI()
 
