@@ -67,11 +67,12 @@ async def get_load_data(offset: int = 0, limit: int = 8000):
 async def get_load_model():
     model = await load_model()
 
-    # Преобразуйте модель в бинарные данные
-    model_bytes = joblib.dump(model)
+    # Сохраняем модель в бинарных данных с использованием BytesIO
+    model_bytes_io = BytesIO()
+    joblib.dump(model, model_bytes_io)
 
     return Response(
-        content=model_bytes,
+        content=model_bytes_io.getvalue(),
         media_type="application/octet-stream",
         headers={"Content-Disposition": "attachment; filename=model.pkl"}
     )
