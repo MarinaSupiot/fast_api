@@ -36,12 +36,6 @@ def jsonable_encoder_custom(item):
         return int(item)
     return json.JSONEncoder.default(item)
 
-
-def jsonable_encoder_custom(item):
-    if isinstance(item, np.int64):
-        return int(item)
-    return json.JSONEncoder.default(item)
-
 async def load_model():
     try:
         model_url = "https://raw.githubusercontent.com/MarinaSupiot/fast_api/main/model_su04.pkl"
