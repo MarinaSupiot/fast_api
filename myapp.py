@@ -71,5 +71,4 @@ async def get_load_model():
         media_type="application/octet-stream",
         headers={"Content-Disposition": "attachment; filename=model.pkl"}
     )
-    )
-    )
+
