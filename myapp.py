@@ -53,5 +53,6 @@ async def get_load_data(offset: int = 0, limit: int = 8000):
 @app.get("/load_model")
 async def get_load_model():
     model = await load_model()
-    return {"model": str(model)}
+    
+    return model
 
