@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends, HTTPException, Response
 from fastapi.responses import JSONResponse
 import pandas as pd
 import pickle
@@ -8,6 +8,7 @@ from zipfile import ZipFile
 import aiohttp
 from aiohttp import ClientSession
 import numpy as np
+import json
 
 app = FastAPI()
 
@@ -30,6 +31,11 @@ async def load_data(offset: int, limit: int):
     except Exception as e:
         raise ValueError(f"Error loading DataFrame: {str(e)}")
 
+def jsonable_encoder_custom(item):
+    if isinstance(item, np.int64):
+        return int(item)
+    return json.JSONEncoder.default(item)
+
 
 async def load_model():
     try:
@@ -51,9 +57,9 @@ async def get_load_data(offset: int = 0, limit: int = 8000):
     return df_test.to_dict(orient='records')
 
 
-@app.get("/load_model")
+@app.get("/load_model", response_model=Response)
 async def get_load_model():
     model = await load_model()
     
-    return model
-
+    # Используйте jsonable_encoder_custom вместо jsonable_encoder
+    return Response(content=model, media_type="application/octet-stream", headers={"Content-Disposition": "attachment; filename=model.pkl"})
