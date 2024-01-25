@@ -31,6 +31,7 @@ async def load_data(offset: int, limit: int):
     except Exception as e:
         raise ValueError(f"Error loading DataFrame: {str(e)}")
 
+
 def jsonable_encoder_custom(item):
     if isinstance(item, np.int64):
         return int(item)
@@ -44,10 +45,11 @@ async def load_model():
             async with session.get(model_url) as response:
                 model_content = await response.read()
 
-        return model_content
+        model = joblib.load(BytesIO(model_content))
+
+        return model
     except Exception as e:
         raise ValueError(f"Error loading model: {str(e)}")
-
 
 
 @app.get("/load_data")
@@ -58,9 +60,14 @@ async def get_load_data(offset: int = 0, limit: int = 8000):
 
 @app.get("/load_model", response_class=Response)
 async def get_load_model():
-    model_content = await load_model()
+    model = await load_model()
+
+    # Сохраняем модель в бинарных данных с использованием BytesIO
+    model_bytes_io = BytesIO()
+    joblib.dump(model, model_bytes_io)
+
     return Response(
-        content=model_content,
+        content=model_bytes_io.getvalue(),
         media_type="application/octet-stream",
         headers={"Content-Disposition": "attachment; filename=model.pkl"}
     )
