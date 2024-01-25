@@ -48,13 +48,24 @@ async def load_model():
 
         async with aiohttp.ClientSession() as session:
             async with session.get(model_url) as response:
+                # Читаем бинарные данные модели напрямую
                 model_content = await response.read()
 
-        model = joblib.load(BytesIO(model_content))
-
-        return model
+        # Возвращаем бинарные данные напрямую, избегая повторной сериализации
+        return model_content
     except Exception as e:
         raise ValueError(f"Error loading model: {str(e)}")
+
+@app.get("/load_model", response_class=Response)
+async def get_load_model():
+    model_content = await load_model()
+
+    return Response(
+        content=model_content,
+        media_type="application/octet-stream",
+        headers={"Content-Disposition": "attachment; filename=model.pkl"}
+    )
+    )
 
 
 @app.get("/load_data")
