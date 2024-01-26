@@ -72,3 +72,4 @@ async def get_load_model():
         headers={"Content-Disposition": "attachment; filename=model.pkl"}
     )
 
+
