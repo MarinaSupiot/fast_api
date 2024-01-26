@@ -1,0 +1,9 @@
+.test_preprocess_reduit.csv.icloud
+.test_preprocess_reduit.csv.zip.icloud
+model_su04.pkl
+myapp.py
+myapp_v1.py
+requirements.txt
+
+!.github/
+!.github/workflows/
