@@ -40,9 +40,15 @@ jobs:
         run: |
           curl https://cli-assets.heroku.com/install-ubuntu.sh | sh
 
-      - name: Deploy to Heroku
+      - name: Set up Heroku Remote
         run: |
           heroku git:remote -a score
+        env:
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+
+      - name: Deploy to Heroku
+        run: |
+          git remote set-url heroku https://git.heroku.com/score.git
           git push heroku main
         env:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
