@@ -41,20 +41,20 @@ jobs:
           curl https://cli-assets.heroku.com/install-ubuntu.sh | sh
         env:
        
-          HEROKU_API_KEY: 9acd5549-326e-4e2e-8fb5-e81d937ab077
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
 
       - name: Log in to Heroku
         run: |
           heroku login
         env:
-          HEROKU_API_KEY: 9acd5549-326e-4e2e-8fb5-e81d937ab077
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
 
       - name: Deploy to Heroku
         run: |
           heroku git:remote -a score
           git push heroku main
         env:
-          HEROKU_API_KEY: 9acd5549-326e-4e2e-8fb5-e81d937ab077
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
         
         
         
