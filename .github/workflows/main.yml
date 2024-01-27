@@ -40,6 +40,13 @@ jobs:
         run: |
           curl https://cli-assets.heroku.com/install-ubuntu.sh | sh
 
+      - name: Add Heroku Git Remote
+        env:
+          HEROKU_APP_NAME: score
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+        run: |
+          heroku git:remote -a $HEROKU_APP_NAME
+
       - name: Setup SSH for Heroku
         run: |
           mkdir -p ~/.ssh/
@@ -49,7 +56,6 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           echo "Permissions set"
           ssh-keyscan -H heroku.com >> ~/.ssh/known_hosts && echo "Heroku.com added" || echo "ssh-keyscan failed"
-
         env:
           HEROKU_SSH_PRIVATE_KEY: ${{ secrets.HEROKU_SSH_PRIVATE_KEY }}
 
