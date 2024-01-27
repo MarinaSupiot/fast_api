@@ -50,6 +50,7 @@ jobs:
           HEROKU_APP_NAME: ${{ secrets.HEROKU_APP_NAME }} # Использование секрета
         run: |
           heroku git:remote -a $HEROKU_APP_NAME
+        
 
 
       - name: Deploy to Heroku
