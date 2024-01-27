@@ -43,21 +43,14 @@ jobs:
       - name: Setup SSH for Heroku
         run: |
           mkdir -p ~/.ssh/
-          echo "***" > ~/.ssh/id_rsa
-          echo "Private key written to ~/.ssh/id_rsa"
+          echo "${{ secrets.HEROKU_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          echo "Permissions set for private key"
-          ssh-keyscan -H heroku.com >> ~/.ssh/known_hosts || echo "ssh-keyscan failed"
+          ssh-keyscan -H heroku.com >> ~/.ssh/known_hosts
           echo "Heroku.com added to known hosts"
         env:
           HEROKU_SSH_PRIVATE_KEY: ${{ secrets.HEROKU_SSH_PRIVATE_KEY }}
 
-
-
-      - name: Set up Heroku Remote with SSH
-        run: |
-          git remote set-url heroku git@heroku.com:score.git
-
       - name: Deploy to Heroku
         run: |
           git push heroku main
+
