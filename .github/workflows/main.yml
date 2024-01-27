@@ -38,9 +38,13 @@ jobs:
         run: |
           heroku git:remote -a $HEROKU_APP_NAME
 
+      # Добавленный шаг для отладки: Проверка удалённых репозиториев
+      - name: Check git remotes
+        run: |
+          git remote -v
+
       - name: Deploy to Heroku
         run: |
           git push heroku main
-        
 
 
