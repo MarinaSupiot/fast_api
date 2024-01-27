@@ -46,6 +46,7 @@ jobs:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
         run: |
           heroku git:remote -a $HEROKU_APP_NAME
+          git remote set-url heroku git@heroku.com:$HEROKU_APP_NAME.git
 
       - name: Setup SSH for Heroku
         run: |
