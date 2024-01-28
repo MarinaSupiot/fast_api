@@ -32,10 +32,13 @@ jobs:
         run: |
           heroku auth:token
 
-      # Явное указание имени приложения при добавлении Heroku remote
       - name: Add Heroku remote
+        env:
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
         run: |
           heroku git:remote -a score
+          git config --get remote.heroku.url || git remote add heroku https://git.heroku.com/score.git
+
 
       # Дополнительный шаг для отладки: Проверка списка приложений Heroku
       - name: List Heroku apps
