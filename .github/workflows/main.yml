@@ -61,6 +61,10 @@ jobs:
       - name: Check git remotes
         run: |
           git remote -v
+          
+      - name: Unshallow clone
+        run: |
+          git fetch --prune --unshallow          
 
       - name: Deploy to Heroku
         run: |
