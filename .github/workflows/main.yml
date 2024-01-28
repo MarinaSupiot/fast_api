@@ -18,6 +18,14 @@ jobs:
         with:
           python-version: '3.x'
 
+      - name: Cache pip
+        uses: actions/cache@v2
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
       - name: Install dependencies
         run: |
           pip install -r requirements.txt
@@ -26,11 +34,16 @@ jobs:
         run: |
           curl https://cli-assets.heroku.com/install.sh | sh
 
-      - name: Authenticate with Heroku
+      - name: Setup .netrc file for Heroku authentication
         env:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
         run: |
-          heroku auth:token
+          cat >~/.netrc <<EOF
+          machine git.heroku.com
+            login ${{ secrets.HEROKU_LOGIN }}
+            password ${{ secrets.HEROKU_API_KEY }}
+          EOF
+          chmod 600 ~/.netrc
 
       - name: Add Heroku remote
         env:
@@ -39,8 +52,6 @@ jobs:
           heroku git:remote -a score
           git config --get remote.heroku.url || git remote add heroku https://git.heroku.com/score.git
 
-
-      # Дополнительный шаг для отладки: Проверка списка приложений Heroku
       - name: List Heroku apps
         env:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
@@ -54,5 +65,4 @@ jobs:
       - name: Deploy to Heroku
         run: |
           git push heroku main
-
 
