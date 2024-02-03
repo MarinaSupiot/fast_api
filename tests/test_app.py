@@ -1,6 +1,6 @@
 import pytest
 from httpx import AsyncClient
-from app import app  # Импортируйте ваш FastAPI приложение
+from myapp import app  # Импортируйте ваш FastAPI приложение
 from aioresponses import aioresponses
 import pandas as pd
 import numpy as np
