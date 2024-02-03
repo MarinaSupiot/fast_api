@@ -4,6 +4,7 @@ from myapp import app  # Предполагается, что myapp - это в�
 import pandas as pd
 import numpy as np
 from unittest.mock import patch, MagicMock
+from myapp import load_data, load_model
 
 # Фикстуры для тестирования
 @pytest.fixture
