@@ -1,11 +1,4 @@
-import pytest
-from httpx import AsyncClient
-from myapp import app  # Предполагается, что myapp - это ваш модуль FastAPI
-import pandas as pd
-import numpy as np
-from unittest.mock import patch, MagicMock
-from myapp import load_data, load_model
-from aioresponses import aioresponses
+
 
 import pytest
 from unittest.mock import MagicMock, patch
