@@ -49,4 +49,5 @@ async def test_load_data_endpoint(test_client):
 async def test_load_model_endpoint(test_client):
     response = await test_client.get("/load_model")
     assert response.status_code == 200
+    
 
