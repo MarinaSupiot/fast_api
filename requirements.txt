@@ -10,6 +10,7 @@ pytest==7.4.4
 httpx
 aioresponses
 pytest-asyncio
+pytest-mock==3.6.1
 
 
 
