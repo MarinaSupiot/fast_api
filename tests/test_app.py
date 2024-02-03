@@ -6,6 +6,7 @@ import pandas as pd
 import numpy as np
 from io import BytesIO
 import joblib
+from myapp import load_data, load_model
 
 # Фикстуры для тестирования
 @pytest.fixture
