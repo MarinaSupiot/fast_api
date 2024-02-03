@@ -1,61 +1,74 @@
-import pytest
-from httpx import AsyncClient
-from fastapi import FastAPI
-from unittest.mock import AsyncMock
+from fastapi import FastAPI, Depends, HTTPException, Response
+from fastapi.responses import JSONResponse
 import pandas as pd
-from myapp import app  # Импортируйте ваш FastAPI приложение
+import pickle
+import joblib
+from io import BytesIO
+from zipfile import ZipFile
+import aiohttp
+from aiohttp import ClientSession
 import numpy as np
+import json
+
+app = FastAPI()
+
+async def load_data(offset: int, limit: int):
+    try:
+        zip_url = "https://github.com/MarinaSupiot/fast_api/raw/main/test_preprocess_reduit.csv.zip"
+        
+        async with aiohttp.ClientSession() as session:
+            async with session.get(zip_url) as response:
+                content = await response.read()
+        
+        with ZipFile(BytesIO(content), 'r') as zip_file:
+            csv_file_name = 'test_preprocess_reduit.csv'
+            with zip_file.open(csv_file_name) as file:
+                # Считываем данные с учетом offset и limit
+                #df_test = pd.read_csv(file, skiprows=offset, nrows=limit)
+                df_test = pd.read_csv(file, skiprows=range(1, offset + 1), nrows=limit)
+
+        return df_test
+    except Exception as e:
+        raise ValueError(f"Error loading DataFrame: {str(e)}")
 
 
-@pytest.fixture
-def test_app():
-    return app
+def jsonable_encoder_custom(item):
+    if isinstance(item, np.int64):
+        return int(item)
+    return json.JSONEncoder.default(item)
 
-@pytest.fixture
-async def test_client(test_app):
-    async with AsyncClient(app=test_app, base_url="http://test") as client:
-        yield client
-@pytest.mark.asyncio
-async def test_load_data_function(mocker):
-    # Мокирование aiohttp.ClientSession().get().read() для возврата байтов zip-файла
-    mock_get = mocker.patch('aiohttp.ClientSession.get', new_callable=AsyncMock)
-    mock_read = AsyncMock(return_value=b'fake_zip_bytes')
-    mock_get.return_value.__aenter__.return_value.read = mock_read
-    
-    # Вызов функции
-    data = await load_data(0, 100)
-    
-    # Проверка, что возвращается DataFrame
-    assert isinstance(data, pd.DataFrame)
-    # Дополнительные проверки можно добавить в зависимости от структуры данных
+async def load_model():
+    try:
+        model_url = "https://raw.githubusercontent.com/MarinaSupiot/fast_api/main/model_su04.pkl"
 
-@pytest.mark.asyncio
-async def test_load_model_function(mocker):
-    # Мокирование aiohttp.ClientSession().get().read() для возврата байтов модели
-    mock_get = mocker.patch('aiohttp.ClientSession.get', new_callable=AsyncMock)
-    mock_read = AsyncMock(return_value=b'fake_model_bytes')
-    mock_get.return_value.__aenter__.return_value.read = mock_read
-    
-    # Вызов функции
+        async with aiohttp.ClientSession() as session:
+            async with session.get(model_url) as response:
+                model_content = await response.read()
+
+        model = joblib.load(BytesIO(model_content))
+
+        return model
+    except Exception as e:
+        raise ValueError(f"Error loading model: {str(e)}")
+
+
+@app.get("/load_data")
+async def get_load_data(offset: int = 0, limit: int = 8000):
+    df_test = await load_data(offset, limit)
+    return df_test.to_dict(orient='records')
+
+
+@app.get("/load_model", response_class=Response)
+async def get_load_model():
     model = await load_model()
-    
-    # Проверка, что модель загружена (можно проверять тип или ключевые свойства модели)
-    assert model is not None
 
-@pytest.mark.asyncio
-async def test_get_load_data_endpoint(test_client):
-    response = await test_client.get("/load_data?offset=0&limit=100")
-    assert response.status_code == 200
-    data = response.json()
-    # Проверка структуры ответа
-    assert isinstance(data, list)  # Предполагаем, что ответ в формате списка словарей
+    # Сохраняем модель в бинарных данных с использованием BytesIO
+    model_bytes_io = BytesIO()
+    joblib.dump(model, model_bytes_io)
 
-@pytest.mark.asyncio
-async def test_get_load_model_endpoint(test_client):
-    response = await test_client.get("/load_model")
-    assert response.status_code == 200
-    # Проверка заголовков ответа для подтверждения отправки файла
-    content_disposition = response.headers.get("Content-Disposition")
-    assert content_disposition == "attachment; filename=model.pkl"
-
+    return Response(
+        content=model_bytes_io.getvalue(),
+        media_type="application/octet-stream",
+        headers={"Content-Disposition": "attachment; filename=model.pkl"}
+    )
 
