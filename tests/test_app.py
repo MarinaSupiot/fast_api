@@ -5,7 +5,16 @@ import pandas as pd
 import numpy as np
 from unittest.mock import patch, MagicMock
 from myapp import load_data, load_model
-import aioresponses
+from aioresponses import aioresponses
+
+import pytest
+from unittest.mock import MagicMock, patch
+from aioresponses import aioresponses  # Обновленный импорт
+import pandas as pd
+from io import BytesIO
+from zipfile import ZipFile
+import joblib
+from myapp import app, load_data, load_model
 
 # Фикстуры для тестирования
 @pytest.fixture
@@ -17,7 +26,7 @@ async def test_client(test_app):
     async with AsyncClient(app=test_app, base_url="http://test") as client:
         yield client
 
-# Юнит-тесты с использованием mocker
+# Юнит-тесты
 @pytest.mark.asyncio
 async def test_load_data_function():
     with aioresponses() as m:
@@ -26,7 +35,7 @@ async def test_load_data_function():
         
         data = await load_data(0, 100)
         assert isinstance(data, pd.DataFrame)
-        
+
 @pytest.mark.asyncio
 async def test_load_model_function():
     with aioresponses() as m:
@@ -35,6 +44,7 @@ async def test_load_model_function():
         
         model = await load_model()
         assert model is not None
+
 
 # Интеграционные тесты
 @pytest.mark.asyncio
