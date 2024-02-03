@@ -5,6 +5,7 @@ import pandas as pd
 import numpy as np
 from unittest.mock import patch, MagicMock
 from myapp import load_data, load_model
+import aioresponses
 
 # Фикстуры для тестирования
 @pytest.fixture
@@ -19,17 +20,19 @@ async def test_client(test_app):
 # Юнит-тесты с использованием mocker
 @pytest.mark.asyncio
 async def test_load_data_function():
-    # Использование patch и MagicMock для мокирования aiohttp сессии
-    with patch('aiohttp.ClientSession.get') as mock_get:
-        mock_get.return_value.__aenter__.return_value.read = MagicMock(return_value=b'fake_zip_bytes')
+    with aioresponses() as m:
+        mock_url = "https://github.com/MarinaSupiot/fast_api/raw/main/test_preprocess_reduit.csv.zip"
+        m.get(mock_url, status=200, body=b'fake_zip_bytes')
+        
         data = await load_data(0, 100)
         assert isinstance(data, pd.DataFrame)
-
+        
 @pytest.mark.asyncio
 async def test_load_model_function():
-    # То же самое для load_model
-    with patch('aiohttp.ClientSession.get') as mock_get:
-        mock_get.return_value.__aenter__.return_value.read = MagicMock(return_value=b'fake_model_bytes')
+    with aioresponses() as m:
+        mock_url = "https://raw.githubusercontent.com/MarinaSupiot/fast_api/main/model_su04.pkl"
+        m.get(mock_url, status=200, body=b'fake_model_bytes')
+        
         model = await load_model()
         assert model is not None
 
