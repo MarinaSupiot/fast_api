@@ -62,7 +62,7 @@ async def get_load_data(offset: int = 0, limit: int = 8000):
 async def get_load_model():
     model = await load_model()
 
-    # Сохраняем модель в бинарных данных с использованием BytesIO
+
     model_bytes_io = BytesIO()
     joblib.dump(model, model_bytes_io)
 
