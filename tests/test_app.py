@@ -8,7 +8,7 @@ import joblib
 from myapp import app, load_data, load_model
 from fastapi.testclient import TestClient
 
-# Фикстуры для тестирования
+
 @pytest.fixture
 def test_app():
     return app
@@ -18,7 +18,6 @@ async def test_client(test_app):
     async with TestClient(app) as client:
         yield client
 
-# Юнит-тесты
 @pytest.mark.asyncio
 async def test_load_data_function():
     with aioresponses() as m:
@@ -37,7 +36,7 @@ async def test_load_model_function():
         model = await load_model()
         assert model is not None
 
-# Интеграционные тесты
+
 @pytest.mark.asyncio
 async def test_get_load_data_endpoint(test_client):
     response = await test_client.get("/load_data?offset=0&limit=100")
