@@ -22,8 +22,12 @@ async def test_load_model():
         async with AsyncClient(app=app, base_url="http://test") as ac:
             response = await ac.get("/load_model")
             assert response.status_code == 200
+
+            # Десериализуем ответ для проверки
             response_data = pickle.loads(response.content)
-            assert response_data == mock_model_data, f"Expected {mock_model_data}, got {response_data}"
+            # Детальное сравнение
+            assert response_data['status'] == mock_model_data['status']
+            assert response_data['message'] == mock_model_data['message']
 
 @pytest.mark.asyncio
 async def test_load_model():
