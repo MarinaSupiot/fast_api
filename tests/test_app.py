@@ -12,25 +12,33 @@ from unittest.mock import patch
 
 
 
-
 @pytest.mark.asyncio
 async def test_load_data():
-    mock_data = pd.DataFrame({'column1': ['value1', 'value2']})
-    with patch('myapp.load_data', return_value=mock_data):
+    # Создаем мок DataFrame
+    mock_df = pd.DataFrame({
+        'column1': ['value1', 'value2']
+    })
+
+    # Мокируем функцию `load_data` чтобы возвращала mock_df
+    with patch('myapp.load_data', return_value=mock_df):
         async with AsyncClient(app=app, base_url="http://test") as ac:
             response = await ac.get("/load_data?offset=0&limit=10")
             assert response.status_code == 200
-            assert response.json() == mock_data.to_dict(orient='records')
-
+            assert response.json() == mock_df.to_dict(orient='records')
+            
 
 @pytest.mark.asyncio
 async def test_load_model():
-    # Предположим, что функция возвращает сериализованный объект.
-    # Мокируем функцию так, чтобы возвращать байты.
-    mock_model_response = b"fake_serialized_model_data"
-    with patch('myapp.load_model', return_value=mock_model_response):
+    # Создаем мокированные данные модели
+    mock_model_data = {"status": "success", "message": "Model loaded successfully"}
+    # Сериализуем данные
+    mock_serialized_model_data = pickle.dumps(mock_model_data)
+
+    # Мокируем функцию `load_model` чтобы возвращала сериализованные данные
+    with patch('myapp.load_model', return_value=mock_serialized_model_data):
         async with AsyncClient(app=app, base_url="http://test") as ac:
             response = await ac.get("/load_model")
             assert response.status_code == 200
-            # Дополнительно проверяем, соответствует ли тело ответа мокированному
-            assert response.content == mock_model_response
+            # Десериализуем ответ для проверки
+            response_data = pickle.loads(response.content)
+            assert response_data == mock_model_data
