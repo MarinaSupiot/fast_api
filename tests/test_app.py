@@ -8,28 +8,32 @@ import joblib
 from myapp import app, load_data, load_model
 from fastapi.testclient import TestClient
 from httpx import AsyncClient 
+from unittest.mock import patch
 
 
 
 
 @pytest.mark.asyncio
 async def test_load_data():
-    mock_url = "https://github.com/MarinaSupiot/fast_api/raw/main/test_preprocess_reduit.csv.zip"
-    with aioresponses() as m:
-        m.get(mock_url, status=200, body=b'mock zip content')
-
+    mock_data = [{'column1': 'value1'}, {'column1': 'value2'}]  # Пример мокированных данных
+    with patch('path.to.your.load_data_function', return_value=mock_data):
         async with AsyncClient(app=app, base_url="http://test") as ac:
             response = await ac.get("/load_data?offset=0&limit=10")
-        assert response.status_code == 200
-        # Дополнительные проверки ответа, если нужно
+            assert response.status_code == 200
+            assert response.json() == mock_data
 
 @pytest.mark.asyncio
 async def test_load_model():
-    mock_url = "https://raw.githubusercontent.com/MarinaSupiot/fast_api/main/model_su04.pkl"
-    with aioresponses() as m:
-        m.get(mock_url, status=200, body=b'mock model content')
-        
+    # Создаем мок модели, который может быть любым объектом
+    mock_model = MagicMock(name='MockModel')
+    
+    # Сериализуем мок модели в байты, чтобы имитировать реальный ответ
+    model_bytes = BytesIO()
+    joblib.dump(mock_model, model_bytes)
+    model_bytes.seek(0)
+    
+    # Мокируем функцию load_model, чтобы она возвращала сериализованную мок модель
+    with patch('path.to.your.load_model_function', return_value=model_bytes.getvalue()):
         async with AsyncClient(app=app, base_url="http://test") as ac:
             response = await ac.get("/load_model")
-        assert response.status_code == 200
-        # Дополнительные проверки ответа, если нужно
+            assert response.status_code == 200
