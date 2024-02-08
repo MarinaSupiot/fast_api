@@ -7,6 +7,7 @@ from zipfile import ZipFile
 import joblib
 from myapp import app, load_data, load_model
 from fastapi.testclient import TestClient
+from httpx import AsyncClient 
 
 
 
@@ -14,9 +15,9 @@ from fastapi.testclient import TestClient
 @pytest.mark.asyncio
 async def test_load_data():
     mock_url = "https://github.com/MarinaSupiot/fast_api/raw/main/test_preprocess_reduit.csv.zip"
-    with aioresponses() as m:  # Исправлено использование aioresponses
+    with aioresponses() as m:
         m.get(mock_url, status=200, body=b'mock zip content')
-        
+
         async with AsyncClient(app=app, base_url="http://test") as ac:
             response = await ac.get("/load_data?offset=0&limit=10")
         assert response.status_code == 200
@@ -25,11 +26,10 @@ async def test_load_data():
 @pytest.mark.asyncio
 async def test_load_model():
     mock_url = "https://raw.githubusercontent.com/MarinaSupiot/fast_api/main/model_su04.pkl"
-    with aioresponses() as m:  # Исправлено использование aioresponses
+    with aioresponses() as m:
         m.get(mock_url, status=200, body=b'mock model content')
         
         async with AsyncClient(app=app, base_url="http://test") as ac:
             response = await ac.get("/load_model")
         assert response.status_code == 200
         # Дополнительные проверки ответа, если нужно
-
