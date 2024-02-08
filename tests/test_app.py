@@ -9,6 +9,7 @@ from myapp import app, load_data, load_model
 from fastapi.testclient import TestClient
 from httpx import AsyncClient 
 from unittest.mock import patch
+import pickle
 
 
 
