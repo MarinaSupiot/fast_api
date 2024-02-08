@@ -25,22 +25,9 @@ async def test_load_model():
 
             # Десериализуем ответ для проверки
             response_data = pickle.loads(response.content)
-            # Детальное сравнение
-            assert response_data['status'] == mock_model_data['status']
-            assert response_data['message'] == mock_model_data['message']
+            
+            # Добавляем проверку типа и вывод десериализованных данных для отладки
+            assert isinstance(response_data, dict), "Response data is not a dictionary"
+            print("Deserialized response data:", response_data)
 
-@pytest.mark.asyncio
-async def test_load_model():
-    # Создаем мокированные данные модели
-    mock_model_data = {"status": "success", "message": "Model loaded successfully"}
-    # Сериализуем данные
-    mock_serialized_model_data = pickle.dumps(mock_model_data)
-
-    # Мокируем функцию `load_model` чтобы возвращала сериализованные данные
-    with patch('myapp.load_model', return_value=mock_serialized_model_data):
-        async with AsyncClient(app=app, base_url="http://test") as ac:
-            response = await ac.get("/load_model")
-            assert response.status_code == 200
-            # Десериализуем ответ для проверки
-            response_data = pickle.loads(response.content)
-            assert response_data == mock_model_data
+            assert response_data == mock_model_data, f"Expected {mock_model_data}, got {response_data}"
