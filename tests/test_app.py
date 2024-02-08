@@ -7,27 +7,32 @@ from zipfile import ZipFile
 import joblib
 from myapp import app, load_data, load_model
 from fastapi.testclient import TestClient
-from httpx import AsyncClient 
-from unittest.mock import patch
-import pickle
 
 
+@pytest.fixture
+def test_app():
+    return app
+
+@pytest.fixture
+async def test_client(test_app):
+    async with TestClient(app) as client:
+        yield client
 
 @pytest.mark.asyncio
-async def test_load_model():
-    mock_model_data = {"status": "success", "message": "Model loaded successfully"}
-    mock_serialized_model_data = pickle.dumps(mock_model_data)
+async def test_load_data_function():
+    with aioresponses() as m:
+        mock_url = "https://github.com/MarinaSupiot/fast_api/raw/main/test_preprocess_reduit.csv.zip"
+        m.get(mock_url, status=200, body=b'fake_zip_bytes')
+        
+        data = await load_data(0, 100)
+        assert isinstance(data, pd.DataFrame)
 
-    with patch('myapp.load_model', return_value=mock_serialized_model_data):
-        async with AsyncClient(app=app, base_url="http://test") as ac:
-            response = await ac.get("/load_model")
-            assert response.status_code == 200
+@pytest.mark.asyncio
+async def test_load_model_function():
+    with aioresponses() as m:
+        mock_url = "https://raw.githubusercontent.com/MarinaSupiot/fast_api/main/model_su04.pkl"
+        m.get(mock_url, status=200, body=b'fake_model_bytes')
+        
+        model = await load_model()
+        assert model is not None
 
-            # Десериализуем ответ для проверки
-            response_data = pickle.loads(response.content)
-            
-            # Добавляем проверку типа и вывод десериализованных данных для отладки
-            assert isinstance(response_data, dict), "Response data is not a dictionary"
-            print("Deserialized response data:", response_data)
-
-            assert response_data == mock_model_data, f"Expected {mock_model_data}, got {response_data}"
